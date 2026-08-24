@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진과 사진 사이 · 여섯 사례 관찰실</title>
+<meta name="description" content="중학교 3학년 과학 VI. 에너지 전환과 보존 2차시 개념기반 탐구학습 시뮬레이션">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Song+Myung&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7EBE6;
+    --paper-2:#F3F5F1;
+    --ink:#17211C;
+    --ink-60:rgba(23,33,28,.62);
+    --ink-30:rgba(23,33,28,.3);
+    --line:rgba(23,33,28,.18);
+    --height:#2F52C4;
+    --motion:#D4547C;
+    --sum:#3D4E47;
+    --shadow:0 1px 0 rgba(23,33,28,.14), 0 8px 22px -16px rgba(23,33,28,.5);
+    --r:10px;
+    --display:"Song Myung", serif;
+    --body:"IBM Plex Sans KR", system-ui, -apple-system, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      linear-gradient(transparent 23px, rgba(23,33,28,.045) 24px),
+      linear-gradient(90deg, transparent 23px, rgba(23,33,28,.045) 24px),
+      var(--paper);
+    background-size:24px 24px;
+    color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1140px;margin:0 auto;padding:26px 20px 80px}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-60);margin:0 0 12px}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5.4vw,46px);line-height:1.2;margin:0 0 12px;letter-spacing:-.01em}
+  .lede{max-width:56ch;margin:0;color:var(--ink-60)}
+  .lede strong{color:var(--ink);font-weight:600}
+
+  /* ---- tabs ---- */
+  .cases{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 18px}
+  .case-tab{
+    font-family:var(--body);font-size:14px;color:var(--ink);
+    background:transparent;border:1.5px solid var(--line);border-radius:999px;
+    padding:8px 15px;cursor:pointer;display:flex;align-items:center;gap:8px;
+  }
+  .case-tab .k{font-family:var(--mono);font-size:11px;color:var(--ink-30)}
+  .case-tab[aria-selected="true"]{background:var(--ink);color:var(--paper-2);border-color:var(--ink)}
+  .case-tab[aria-selected="true"] .k{color:rgba(243,245,241,.55)}
+  .case-tab:focus-visible{outline:2.5px solid var(--motion);outline-offset:2px}
+
+  /* ---- layout ---- */
+  .stage-row{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+  .panel{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  h2{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-60);margin:0 0 12px;display:flex;justify-content:space-between;gap:10px}
+
+  canvas{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .caption{font-size:13px;color:var(--ink-60);margin:10px 0 0}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  button.btn{font-family:var(--body);font-size:14px;font-weight:500;padding:9px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper-2);cursor:pointer}
+  button.btn.ghost{background:transparent;color:var(--ink)}
+  button.btn:focus-visible{outline:2.5px solid var(--motion);outline-offset:2px}
+  .speeds{display:flex;gap:0;border:1.5px solid var(--line);border-radius:999px;overflow:hidden}
+  .speeds button{font-family:var(--mono);font-size:12px;padding:8px 12px;border:0;background:transparent;color:var(--ink-60);cursor:pointer}
+  .speeds button[aria-pressed="true"]{background:var(--ink);color:var(--paper-2)}
+
+  /* ---- sliders ---- */
+  .knob{margin-bottom:16px}
+  .knob-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+  .knob-head label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60)}
+  .knob-head output{font-family:var(--mono);font-size:15px;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--ink)}
+
+  /* ---- bars ---- */
+  .bars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;height:150px;margin-top:4px}
+  .bar-col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+  .bar-track{position:relative;height:112px;border-bottom:1.5px solid var(--ink-30)}
+  .bar-fill{position:absolute;left:14%;right:14%;bottom:0;border-radius:3px 3px 0 0}
+  .bar-fill.h{background:var(--height)}
+  .bar-fill.m{background:var(--motion)}
+  .bar-fill.s{background:var(--sum)}
+  .bar-ref{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink-30)}
+  .bar-name{font-size:12px;color:var(--ink-60);margin-top:7px;text-align:center;line-height:1.25}
+  .bar-val{font-family:var(--mono);font-size:13px;text-align:center;margin-top:2px}
+  .bar-legend{font-family:var(--mono);font-size:10px;color:var(--ink-30);text-align:right;margin:6px 0 0}
+
+  .readout{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;color:var(--ink-60);border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
+  .readout b{color:var(--ink);font-weight:500}
+
+  /* ---- record ---- */
+  .record{margin-top:26px}
+  .setup{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;margin-bottom:16px}
+  .field{display:flex;flex-direction:column;gap:6px;flex:1 1 240px;min-width:0}
+  .field label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60)}
+  .field input{font-family:var(--body);font-size:16px;color:var(--ink);background:transparent;border:0;border-bottom:1.5px solid var(--ink-30);padding:4px 0;width:100%}
+  .field input:focus{outline:none;border-bottom-color:var(--ink)}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-60);font-weight:500;background:var(--paper-2)}
+  td{font-family:var(--mono)}
+  tr:last-child td{border-bottom:0}
+  td.pt{font-family:var(--body);font-weight:600}
+  td .del{border:0;background:transparent;color:var(--ink-30);cursor:pointer;font-size:15px;line-height:1;padding:0 2px}
+  td .del:hover{color:var(--motion)}
+  .empty{font-size:13px;color:var(--ink-60);border:1px dashed var(--line);border-radius:8px;padding:20px 14px;text-align:center;background:#fff}
+
+  .note{font-size:12px;color:var(--ink-60);margin:14px 0 0}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--paper-2);padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:80}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:900px){
+    .stage-row{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .wrap{padding:20px 14px 70px}
+    .case-tab{font-size:13px;padding:7px 12px}
+    th,td{padding:7px 6px;font-size:13px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff}
+    .cases,.controls,.knob,.toast,.stage-row .panel:first-child{display:none !important}
+    .wrap{padding:0;max-width:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">중학교 3학년 과학 · VI. 에너지 전환과 보존 · 2차시</p>
+    <h1>사진과 사진 사이,<br>무슨 일이 일어날까?</h1>
+    <p class="lede">우리 모둠이 맡은 사례를 골라 관찰하세요. 화면의 값을 <strong>세 지점 이상</strong> 기록하고, 질량과 최고 높이를 바꿔 다시 관찰해 보세요.</p>
+  </header>
+
+  <div class="cases" role="tablist" aria-label="사례 선택" id="cases"></div>
+
+  <div class="stage-row">
+    <section class="panel" aria-label="관찰 화면">
+      <h2><span id="caseName">사례</span><span id="caseTag"></span></h2>
+      <canvas id="cv" width="900" height="420"></canvas>
+      <p class="caption" id="caseDesc"></p>
+      <div class="controls">
+        <button class="btn" id="play" type="button">시작</button>
+        <button class="btn ghost" id="again" type="button">처음으로</button>
+        <div class="speeds" role="group" aria-label="재생 속도">
+          <button type="button" data-sp="1" aria-pressed="true">1배</button>
+          <button type="button" data-sp="0.5" aria-pressed="false">0.5배</button>
+          <button type="button" data-sp="0.25" aria-pressed="false">0.25배</button>
+        </div>
+        <button class="btn ghost" id="mark" type="button">이 지점 기록하기</button>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="측정값">
+      <h2>조건과 측정값</h2>
+
+      <div class="knob">
+        <div class="knob-head"><label for="mass">질량</label><output id="massOut">0.10 kg</output></div>
+        <input id="mass" type="range" min="0.05" max="1" step="0.05" value="0.1">
+      </div>
+      <div class="knob">
+        <div class="knob-head"><label for="hgt">최고 높이</label><output id="hgtOut">2.0 m</output></div>
+        <input id="hgt" type="range" min="1" max="8" step="0.5" value="2">
+      </div>
+
+      <div class="bars" aria-hidden="true">
+        <div class="bar-col"><div class="bar-track"><div class="bar-fill h" id="barH"></div></div><p class="bar-name">위치<br>에너지</p><p class="bar-val" id="valH">0.0</p></div>
+        <div class="bar-col"><div class="bar-track"><div class="bar-fill m" id="barM"></div></div><p class="bar-name">운동<br>에너지</p><p class="bar-val" id="valM">0.0</p></div>
+        <div class="bar-col"><div class="bar-track"><div class="bar-ref" id="barRef"></div><div class="bar-fill s" id="barS"></div></div><p class="bar-name">두 에너지의<br>합</p><p class="bar-val" id="valS">0.0</p></div>
+      </div>
+      <p class="bar-legend">단위 J · 점선은 시작할 때의 합</p>
+
+      <div class="readout"><span>높이</span><span><b id="hNow">0.00</b> m</span></div>
+      <div class="readout"><span>속력</span><span><b id="vNow">0.00</b> m/s</span></div>
+    </aside>
+  </div>
+
+  <section class="record">
+    <div class="setup">
+      <div class="field">
+        <label for="team">모둠 이름</label>
+        <input id="team" type="text" placeholder="예: 3반 2모둠" autocomplete="off">
+      </div>
+      <button class="btn ghost" id="copy" type="button">기록 복사하기</button>
+      <button class="btn ghost" id="print" type="button">기록 인쇄하기</button>
+    </div>
+    <h2><span id="recTitle">기록한 지점</span><span id="recCount">0개</span></h2>
+    <div id="recWrap"></div>
+    <p class="note">기록은 사례별로 따로 저장되며, 조건을 바꿔도 지워지지 않습니다. 종이 기록틀에도 손으로 옮겨 적으세요.</p>
+  </section>
+
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var G = 9.8, KEY = 'energy-six-cases-v1';
+
+  /* ---------------- cases ---------------- */
+  // path(u,H) -> {x,y} in metres. u in [0,1].
+  var CASES = [
+    { id:'fall', k:'1', name:'자유 낙하', tag:'떨어짐',
+      desc:'가만히 놓은 공이 기준면까지 곧장 떨어집니다.',
+      end:'stop',
+      path:function(u,H){ return {x:0, y:H*(1-u)}; } },
+
+    { id:'throw', k:'2', name:'위로 던져 올린 공', tag:'올라갔다 내려옴',
+      desc:'기준면에서 위로 던져 올린 공이 올라갔다가 다시 내려옵니다.',
+      end:'stopAtStart', startAtBottom:true,
+      path:function(u,H){ return {x:0, y:H*u}; } },
+
+    { id:'slope', k:'3', name:'마찰 없는 빗면', tag:'왕복',
+      desc:'마찰이 없는 골짜기 모양 빗면을 공이 오르내립니다.',
+      end:'bounceBack',
+      path:function(u,H){
+        var W = 2.6*H, y;
+        if(u < 0.4) y = H*(0.4-u)/0.4;
+        else if(u > 0.6) y = H*(u-0.6)/0.4;
+        else y = 0;
+        return {x:u*W, y:y};
+      } },
+
+    { id:'pendulum', k:'4', name:'진자', tag:'왕복',
+      desc:'실에 매단 추가 좌우로 흔들립니다. 가장 낮은 곳이 기준면입니다.',
+      end:'bounceBack', pendulum:true,
+      path:function(u,H){
+        var L = Math.max(1.4*H, H+0.6);
+        var tmax = Math.acos(Math.max(-0.99, 1 - H/L));
+        var th = -tmax + 2*tmax*u;
+        return {x:L*Math.sin(th), y:L - L*Math.cos(th), L:L, th:th};
+      } },
+
+    { id:'coaster', k:'5', name:'롤러코스터', tag:'언덕을 넘음',
+      desc:'가장 높은 곳에서 출발해 언덕 몇 개를 넘어 도착 지점까지 갑니다.',
+      end:'stop',
+      path:function(u,H){
+        var W = 3.0*H;
+        var y = H*(1-u)*(0.6 + 0.4*Math.cos(6*Math.PI*u));
+        return {x:u*W, y:Math.max(0,y)};
+      } },
+
+    { id:'proj', k:'6', name:'비스듬히 던진 공', tag:'포물선',
+      desc:'비스듬히 위로 던진 공이 포물선을 그리며 날아가 기준면에 도착합니다.',
+      end:'stop', E0k:25/16,
+      path:function(u,H){
+        var R = 3*H;
+        return {x:u*R, y:4*H*u*(1-u)};
+      } }
+  ];
+
+  /* ---------------- state ---------------- */
+  var cur = CASES[0];
+  var m = 0.1, H = 2, speed = 1, running = false;
+  var sim = null, E0 = 0;
+  var records = {}, team = '';
+
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ---------------- storage ---------------- */
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify({team:team, records:records})); }catch(e){} }
+  function load(){
+    try{ var s = JSON.parse(localStorage.getItem(KEY)||'{}');
+      if(s.records) records = s.records; if(s.team) team = s.team; }catch(e){}
+  }
+
+  /* ---------------- tabs ---------------- */
+  var tabs = $('cases');
+  CASES.forEach(function(c){
+    var b = document.createElement('button');
+    b.type='button'; b.className='case-tab'; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', c===cur ? 'true':'false');
+    b.dataset.id = c.id;
+    b.innerHTML = '<span class="k">'+c.k+'</span>'+c.name;
+    b.addEventListener('click', function(){ selectCase(c); });
+    tabs.appendChild(b);
+  });
+
+  function selectCase(c){
+    cur = c;
+    Array.prototype.forEach.call(tabs.children, function(b){
+      b.setAttribute('aria-selected', b.dataset.id===c.id ? 'true':'false');
+    });
+    $('caseName').textContent = c.name;
+    $('caseTag').textContent = c.tag;
+    $('caseDesc').textContent = c.desc;
+    reset(); renderRecords();
+  }
+
+  /* ---------------- simulation ---------------- */
+  function reset(){
+    running = false; $('play').textContent = '시작';
+    sim = {u:0, dir:1, done:false, wentUp:false};
+    E0 = m*G*H*(cur.E0k || 1);
+    step(0); draw();
+  }
+
+  function P(u){ return cur.path(u, H); }
+
+  function arcPerU(u){
+    var d = 0.0015, a = P(Math.max(0,u-d)), b = P(Math.min(1,u+d));
+    var dx = b.x-a.x, dy = b.y-a.y;
+    return Math.max(0.02, Math.sqrt(dx*dx+dy*dy)/(Math.min(1,u+d)-Math.max(0,u-d)));
+  }
+
+  function stateNow(){
+    var p = P(sim.u), hh = Math.max(0, p.y);
+    var pe = m*G*hh, ke = Math.max(0, E0 - pe);
+    return {h:hh, v:Math.sqrt(2*ke/m), pe:pe, ke:ke};
+  }
+
+  function clampU(u){ return Math.max(0, Math.min(1, u)); }
+
+  function step(dt){
+    if(!sim || sim.done || dt<=0) return;
+    var n = 6, h = dt/n, i;
+    for(i=0;i<n;i++){
+      {
+        var s = stateNow();
+        var v = s.v;
+        if(v < 0.01){
+          // 정지 상태: 어느 쪽이 내리막인지 보고 움직일 방향을 정한다
+          var eps = 0.005, yc = P(sim.u).y;
+          var yf = P(clampU(sim.u + eps*sim.dir)).y;
+          if(!(yf < yc - 1e-7)){
+            var yb = P(clampU(sim.u - eps*sim.dir)).y;
+            if(yb < yc - 1e-7){ sim.dir = -sim.dir; sim.wentUp = true; }
+            else { sim.done = true; break; }
+          }
+          v = 0.05;
+        }
+        var du = (v*h/arcPerU(sim.u))*sim.dir;
+        sim.u += du;
+        if(sim.u >= 1){
+          sim.u = 1;
+          if(cur.end==='stop'){ sim.done = true; break; }
+          sim.dir = -1; sim.wentUp = true;
+        }
+        if(sim.u <= 0){
+          sim.u = 0;
+          if(cur.end==='stopAtStart' && sim.wentUp){ sim.done = true; break; }
+          if(cur.end==='stop'){ sim.done = true; break; }
+          sim.dir = 1;
+        }
+      }
+    }
+    if(sim.done){ running = false; $('play').textContent = '시작'; }
+  }
+
+  /* ---------------- drawing ---------------- */
+  function fit(){
+    var box = cv.parentNode.getBoundingClientRect();
+    var w = Math.max(300, box.width - 34);
+    var hgt = window.innerWidth < 620 ? 300 : 400;
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = w*dpr; cv.height = hgt*dpr;
+    cv.style.height = hgt+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {w:w, h:hgt};
+  }
+
+  function bbox(){
+    var minX=1e9,maxX=-1e9,maxY=0,i,p;
+    for(i=0;i<=120;i++){ p=P(i/120); if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x; if(p.y>maxY)maxY=p.y; }
+    if(cur.pendulum){ maxY = P(0).L; }
+    if(maxX-minX < 0.4){ minX -= 0.4; maxX += 0.4; }
+    return {minX:minX, maxX:maxX, maxY:Math.max(maxY, H)};
+  }
+
+  function draw(){
+    var d = fit(), w = d.w, hpx = d.h;
+    var pad = {l:52, r:22, t:26, b:44};
+    var bb = bbox();
+    var sx = (w-pad.l-pad.r)/Math.max(0.001,(bb.maxX-bb.minX));
+    var sy = (hpx-pad.t-pad.b)/Math.max(0.001, bb.maxY*1.06);
+    var s = Math.min(sx, sy);
+    var offX = pad.l + ((w-pad.l-pad.r) - (bb.maxX-bb.minX)*s)/2;
+    var baseY = hpx - pad.b;
+    function X(x){ return offX + (x-bb.minX)*s; }
+    function Y(y){ return baseY - y*s; }
+
+    ctx.clearRect(0,0,w,hpx);
+
+    // 기준면
+    ctx.strokeStyle = 'rgba(23,33,28,.55)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(14, baseY); ctx.lineTo(w-14, baseY); ctx.stroke();
+    ctx.fillStyle = 'rgba(23,33,28,.55)';
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.fillText('기준면  높이 0 m', 16, baseY+17);
+
+    // track / guide
+    ctx.lineWidth = 2;
+    if(cur.id==='slope' || cur.id==='coaster'){
+      ctx.strokeStyle = 'rgba(23,33,28,.32)';
+      ctx.beginPath();
+      for(var i=0;i<=200;i++){ var p=P(i/200); if(i===0) ctx.moveTo(X(p.x),Y(p.y)); else ctx.lineTo(X(p.x),Y(p.y)); }
+      ctx.stroke();
+    }else if(cur.pendulum){
+      var p0 = P(0.5);
+      ctx.fillStyle='rgba(23,33,28,.5)';
+      ctx.beginPath(); ctx.arc(X(0), Y(p0.L), 4, 0, 7); ctx.fill();
+      ctx.strokeStyle='rgba(23,33,28,.2)'; ctx.setLineDash([3,4]); ctx.lineWidth=1.2;
+      ctx.beginPath();
+      for(var j=0;j<=80;j++){ var q=P(j/80); if(j===0) ctx.moveTo(X(q.x),Y(q.y)); else ctx.lineTo(X(q.x),Y(q.y)); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }else if(cur.id==='proj'){
+      ctx.strokeStyle='rgba(23,33,28,.2)'; ctx.setLineDash([3,4]); ctx.lineWidth=1.2;
+      ctx.beginPath();
+      for(var k=0;k<=80;k++){ var q2=P(k/80); if(k===0) ctx.moveTo(X(q2.x),Y(q2.y)); else ctx.lineTo(X(q2.x),Y(q2.y)); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }else{
+      ctx.strokeStyle='rgba(23,33,28,.16)'; ctx.setLineDash([3,5]); ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(0), Y(H)); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // ball position
+    var st = stateNow(), bx, by;
+    var pp = P(sim.u); bx = X(pp.x); by = Y(pp.y);
+    if(cur.pendulum){
+      ctx.strokeStyle='rgba(23,33,28,.45)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(X(0), Y(pp.L)); ctx.lineTo(bx,by); ctx.stroke();
+    }
+
+    // height marker
+    ctx.strokeStyle='rgba(47,82,196,.45)'; ctx.setLineDash([4,4]); ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(16, by); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#2F52C4'; ctx.font='11px "IBM Plex Mono", monospace';
+    ctx.fillText(st.h.toFixed(2)+' m', 16, by-6);
+
+    // ball
+    ctx.fillStyle='#17211C';
+    ctx.beginPath(); ctx.arc(bx, by, 9, 0, 7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.5)';
+    ctx.beginPath(); ctx.arc(bx-3, by-3, 2.4, 0, 7); ctx.fill();
+
+    updatePanel(st);
+  }
+
+  function updatePanel(st){
+    var maxE = Math.max(E0, 0.0001);
+    var pct = function(v){ return Math.max(0, Math.min(100, v/maxE*100)); };
+    $('barH').style.height = pct(st.pe)+'%';
+    $('barM').style.height = pct(st.ke)+'%';
+    $('barS').style.height = pct(st.pe+st.ke)+'%';
+    $('barRef').style.bottom = pct(E0)+'%';
+    $('valH').textContent = st.pe.toFixed(2);
+    $('valM').textContent = st.ke.toFixed(2);
+    $('valS').textContent = (st.pe+st.ke).toFixed(2);
+    $('hNow').textContent = st.h.toFixed(2);
+    $('vNow').textContent = st.v.toFixed(2);
+  }
+
+  /* ---------------- loop ---------------- */
+  var last = 0;
+  function frame(t){
+    var dt = last ? Math.min(0.05, (t-last)/1000) : 0;
+    last = t;
+    if(running) step(dt*speed);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ---------------- controls ---------------- */
+  $('play').addEventListener('click', function(){
+    if(sim.done) reset();
+    running = !running;
+    this.textContent = running ? '멈춤' : '시작';
+  });
+  $('again').addEventListener('click', reset);
+  document.querySelectorAll('.speeds button').forEach(function(b){
+    b.addEventListener('click', function(){
+      speed = parseFloat(b.dataset.sp);
+      document.querySelectorAll('.speeds button').forEach(function(o){
+        o.setAttribute('aria-pressed', o===b ? 'true':'false');
+      });
+    });
+  });
+  $('mass').addEventListener('input', function(){
+    m = parseFloat(this.value);
+    $('massOut').textContent = m.toFixed(2)+' kg';
+    reset();
+  });
+  $('hgt').addEventListener('input', function(){
+    H = parseFloat(this.value);
+    $('hgtOut').textContent = H.toFixed(1)+' m';
+    reset();
+  });
+  window.addEventListener('resize', draw);
+
+  /* ---------------- records ---------------- */
+  var LETTERS = 'ABCDEFGH';
+  $('mark').addEventListener('click', function(){
+    var list = records[cur.id] || (records[cur.id] = []);
+    if(list.length >= 8){ toast('한 사례에 최대 8개까지 기록할 수 있습니다'); return; }
+    var st = stateNow();
+    list.push({
+      pt: LETTERS[list.length], m:m, H:H,
+      h:+st.h.toFixed(2), pe:+st.pe.toFixed(2), ke:+st.ke.toFixed(2), s:+(st.pe+st.ke).toFixed(2)
+    });
+    save(); renderRecords(); toast(LETTERS[list.length-1]+' 지점을 기록했습니다');
+  });
+
+  function renderRecords(){
+    var list = records[cur.id] || [];
+    $('recTitle').textContent = cur.name + ' · 기록한 지점';
+    $('recCount').textContent = list.length + '개';
+    var wrap = $('recWrap');
+    if(!list.length){
+      wrap.innerHTML = '<p class="empty">아직 기록이 없습니다. 화면을 멈춘 뒤 <strong>이 지점 기록하기</strong>를 누르세요.</p>';
+      return;
+    }
+    var html = '<table><thead><tr><th>지점</th><th>질량(kg)</th><th>최고 높이(m)</th><th>높이(m)</th><th>위치 에너지(J)</th><th>운동 에너지(J)</th><th>두 에너지의 합(J)</th><th></th></tr></thead><tbody>';
+    list.forEach(function(r,i){
+      html += '<tr><td class="pt">'+r.pt+'</td><td>'+r.m.toFixed(2)+'</td><td>'+r.H.toFixed(1)+'</td><td>'+r.h.toFixed(2)+'</td><td>'+r.pe.toFixed(2)+'</td><td>'+r.ke.toFixed(2)+'</td><td>'+r.s.toFixed(2)+'</td>'+
+        '<td><button class="del" type="button" data-i="'+i+'" aria-label="'+r.pt+' 지점 지우기">×</button></td></tr>';
+    });
+    wrap.innerHTML = html + '</tbody></table>';
+    wrap.querySelectorAll('.del').forEach(function(b){
+      b.addEventListener('click', function(){
+        var list = records[cur.id];
+        list.splice(parseInt(b.dataset.i,10),1);
+        list.forEach(function(r,k){ r.pt = LETTERS[k]; });
+        save(); renderRecords();
+      });
+    });
+  }
+
+  function summary(){
+    var out = ['[여섯 사례 관찰실] '+(team||'모둠 이름 없음')];
+    CASES.forEach(function(c){
+      var list = records[c.id];
+      if(!list || !list.length) return;
+      out.push('');
+      out.push('■ '+c.name);
+      out.push('지점 / 질량 / 최고높이 / 높이 / 위치E / 운동E / 합');
+      list.forEach(function(r){
+        out.push([r.pt, r.m.toFixed(2)+'kg', r.H.toFixed(1)+'m', r.h.toFixed(2)+'m',
+                  r.pe.toFixed(2), r.ke.toFixed(2), r.s.toFixed(2)].join(' / '));
+      });
+    });
+    if(out.length===1) out.push('기록 없음');
+    return out.join('\n');
+  }
+
+  $('copy').addEventListener('click', function(){
+    var text = summary();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast('기록을 복사했습니다'); }, function(){ fb(text); });
+    } else fb(text);
+  });
+  function fb(text){
+    var ta=document.createElement('textarea'); ta.value=text;
+    ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast('기록을 복사했습니다'); }
+    catch(e){ toast('복사가 안 되면 값을 직접 옮겨 적으세요'); }
+    document.body.removeChild(ta);
+  }
+  $('print').addEventListener('click', function(){ window.print(); });
+
+  var toastEl = $('toast');
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    setTimeout(function(){ toastEl.classList.remove('show'); }, 2000);
+  }
+
+  $('team').addEventListener('input', function(){ team = this.value; save(); });
+
+  /* ---------------- init ---------------- */
+  load();
+  $('team').value = team;
+  $('massOut').textContent = m.toFixed(2)+' kg';
+  $('hgtOut').textContent = H.toFixed(1)+' m';
+  selectCase(CASES[0]);
+})();
+</script>
+</body>
+</html>
